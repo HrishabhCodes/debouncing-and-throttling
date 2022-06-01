@@ -4,18 +4,30 @@ import { useEffect, useState } from "react";
 
 function App() {
   const [input, setInput] = useState("");
-  const [movies, setMovies] = useState([]);
+  const [movies, setMovies] = useState([""]);
 
   useEffect(() => {
-    const API_KEY = process.env.REACT_APP_API_KEY;
+    const options = {
+      method: "GET",
+      url: "https://online-movie-database.p.rapidapi.com/auto-complete",
+      params: { q: `${input}` },
+      headers: {
+        "X-RapidAPI-Host": "online-movie-database.p.rapidapi.com",
+        "X-RapidAPI-Key": "f761570832mshc17af0801685019p1039b4jsnfecac71a93b9",
+      },
+    };
 
     const identifier = setTimeout(async () => {
       if (input !== "") {
-        const res = await axios.get(
-          `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&language=en-US&query=${input}`
-        );
-        let data = res.data;
-        setMovies([...data.results]);
+        axios
+          .request(options)
+          .then(function (response) {
+            let data = response.data;
+            data.d ? setMovies([...data.d]) : setMovies([]);
+          })
+          .catch(function (error) {
+            console.error(error);
+          });
       }
     }, 500);
 
@@ -40,17 +52,15 @@ function App() {
         />
         {input !== "" && (
           <div className="display">
-            {movies[0] ? (
-              movies.map((movie, idx) => {
-                return (
-                  <p className="movie" key={idx}>
-                    {movie.original_title}
-                  </p>
-                );
-              })
-            ) : (
-              <p>No result found</p>
-            )}
+            {movies[0]
+              ? movies.map((movie, idx) => {
+                  return (
+                    <p className="movie" key={idx}>
+                      {movie.l}
+                    </p>
+                  );
+                })
+              : null}
           </div>
         )}
       </div>
